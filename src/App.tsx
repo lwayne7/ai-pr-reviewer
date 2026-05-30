@@ -290,6 +290,7 @@ export function App() {
               {activeTab === 'suggestions' && prInfo && (
                 <ReviewPanel 
                   comments={reviewResult.comments}
+                  files={files}
                   owner={prInfo.owner}
                   repo={prInfo.repo}
                   pullNumber={prInfo.pullNumber}
