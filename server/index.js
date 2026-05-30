@@ -36,13 +36,8 @@ app.post('/api/review', async (req, res) => {
     return res.status(500).json({ error: 'Aliyun API Key (ALIYUN_API_KEY) is not configured on the backend server.' });
   }
 
-  // Map requested model names to Aliyun Qwen models
-  let resolvedModel = 'qwen-plus'; // Default fast model
-  if (modelName === 'gemini-1.5-pro' || modelName === 'qwen-max') {
-    resolvedModel = 'qwen-max';
-  } else if (modelName === 'qwen2.5-coder-32b-instruct' || modelName === 'coder-32b') {
-    resolvedModel = 'qwen2.5-coder-32b-instruct';
-  }
+  // Use the requested model name directly, with qwen-plus as default fallback
+  const resolvedModel = modelName || 'qwen-plus';
 
   // Format file diff data for the system prompt
   const filesDiffData = files
