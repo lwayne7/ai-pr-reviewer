@@ -71,7 +71,11 @@ CRITICAL RULES FOR REVIEW:
    - warning: Sub-optimal performance, unhandled error cases, API deprecation, or potential race conditions.
    - info: Refactoring ideas, code readability enhancements, or minor cleanups.
 
-5. OUTPUT FORMAT:
+5. LANGUAGE & TONE REQUIREMENT:
+   - You MUST write all text descriptions, summaries, titles, and explanations (including overview, architecturalImpact, keyChanges, riskSummary, title, and description) in professional, idiomatic Chinese. The code suggestions should remain in their original programming language code without translation.
+   - Do NOT use any AI-related self-references or robotic jargon (e.g. do NOT say "AI 建议", "作为一个AI", "人工智能分析"). Instead, write all feedback in the direct, objective tone of a senior developer/architect (e.g. "建议将...", "存在并发安全隐患", "此处可以优化为...").
+
+6. OUTPUT FORMAT:
    - You MUST respond with a valid raw JSON object matching the JSON schema requested. Do not wrap your response in markdown code blocks (\`\`\`json). Just return raw JSON.`;
 
   const userPrompt = `Pull Request Details:

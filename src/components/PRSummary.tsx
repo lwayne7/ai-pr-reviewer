@@ -15,9 +15,9 @@ export function PRSummary({ prInfo, summary }: PRSummaryProps) {
   };
 
   const getRiskLabel = (score: number) => {
-    if (score < 30) return 'Low Risk';
-    if (score < 70) return 'Medium Risk';
-    return 'High Risk';
+    if (score < 30) return '低风险';
+    if (score < 70) return '中风险';
+    return '高风险';
   };
 
   const totalLines = prInfo.additions + prInfo.deletions;
@@ -49,7 +49,7 @@ export function PRSummary({ prInfo, summary }: PRSummaryProps) {
               className="btn btn-secondary"
               style={{ padding: '8px 12px', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
             >
-              Open PR ↗
+              打开 PR ↗
             </a>
           </div>
 
@@ -81,7 +81,7 @@ export function PRSummary({ prInfo, summary }: PRSummaryProps) {
         {/* Change Stats Bar */}
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>
-            <span>{prInfo.changedFiles} files changed</span>
+            <span>{prInfo.changedFiles} 个文件被修改</span>
             <span>
               <span style={{ color: 'var(--color-success)', fontWeight: 600 }}>+{prInfo.additions}</span>
               {' / '}
@@ -101,15 +101,15 @@ export function PRSummary({ prInfo, summary }: PRSummaryProps) {
         <div className="pr-stats">
           <div className="stat-box">
             <div className="stat-val additions">+{prInfo.additions}</div>
-            <div className="stat-lbl">Additions</div>
+            <div className="stat-lbl">新增行数</div>
           </div>
           <div className="stat-box">
             <div className="stat-val deletions">-{prInfo.deletions}</div>
-            <div className="stat-lbl">Deletions</div>
+            <div className="stat-lbl">删除行数</div>
           </div>
           <div className="stat-box">
             <div className="stat-val">{prInfo.changedFiles}</div>
-            <div className="stat-lbl">Files</div>
+            <div className="stat-lbl">变更文件</div>
           </div>
         </div>
       </GlassCard>
@@ -119,17 +119,17 @@ export function PRSummary({ prInfo, summary }: PRSummaryProps) {
         {/* Main Text Summary */}
         <GlassCard style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
-            <h2 style={{ fontSize: '1.2rem', marginBottom: '8px', color: 'var(--color-accent)' }}>PR Overview</h2>
+            <h2 style={{ fontSize: '1.2rem', marginBottom: '8px', color: 'var(--color-accent)' }}>变更概要评估</h2>
             <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.95rem', lineHeight: '1.6' }}>{summary.overview}</p>
           </div>
 
           <div>
-            <h2 style={{ fontSize: '1.2rem', marginBottom: '8px', color: 'var(--color-secondary)' }}>Architectural Impact</h2>
+            <h2 style={{ fontSize: '1.2rem', marginBottom: '8px', color: 'var(--color-secondary)' }}>架构冲击分析</h2>
             <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.95rem', lineHeight: '1.6' }}>{summary.architecturalImpact}</p>
           </div>
 
           <div>
-            <h2 style={{ fontSize: '1.2rem', marginBottom: '12px', color: 'var(--color-primary)' }}>Key Changes</h2>
+            <h2 style={{ fontSize: '1.2rem', marginBottom: '12px', color: 'var(--color-primary)' }}>核心修改点</h2>
             <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {summary.keyChanges.map((change, idx) => (
                 <li key={idx} style={{ color: 'var(--color-text-secondary)', fontSize: '0.92rem', lineHeight: '1.5' }}>
@@ -142,7 +142,7 @@ export function PRSummary({ prInfo, summary }: PRSummaryProps) {
 
         {/* AI Risk Analysis Card */}
         <GlassCard style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '1.1rem', color: 'var(--color-text-primary)' }}>AI Risk Evaluation</h2>
+          <h2 style={{ fontSize: '1.1rem', color: 'var(--color-text-primary)' }}>代码风险评级</h2>
           
           {/* Risk Gauge Circle */}
           <div style={{ position: 'relative', width: '130px', height: '130px', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center' }}>
@@ -174,7 +174,7 @@ export function PRSummary({ prInfo, summary }: PRSummaryProps) {
                 {summary.riskScore}
               </span>
               <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Score / 100
+                风险指数 / 100
               </span>
             </div>
           </div>

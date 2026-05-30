@@ -37,14 +37,14 @@ export function DiffViewer({ files, comments }: DiffViewerProps) {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    alert('Code suggestion copied to clipboard!');
+    alert('代码修复建议已复制到剪贴板！');
   };
 
   return (
     <div className="pr-content-grid">
       {/* File List Side Panel */}
       <GlassCard className="file-list-card" style={{ padding: '16px' }}>
-        <h3 style={{ fontSize: '1.1rem', marginBottom: '12px', color: 'var(--color-text-primary)' }}>Changed Files</h3>
+        <h3 style={{ fontSize: '1.1rem', marginBottom: '12px', color: 'var(--color-text-primary)' }}>已变更文件</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {files.map((file, idx) => {
             const commentCount = getFileCommentCount(file.filename);
@@ -90,7 +90,7 @@ export function DiffViewer({ files, comments }: DiffViewerProps) {
             <div className="diff-file-header">
               <span className="diff-filepath" style={{ fontFamily: 'var(--font-mono)' }}>{selectedFile.filename}</span>
               <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
-                Status: <span style={{ textTransform: 'capitalize', fontWeight: 600 }}>{selectedFile.status}</span>
+                文件状态: <span style={{ textTransform: 'capitalize', fontWeight: 600 }}>{selectedFile.status}</span>
               </span>
             </div>
 
@@ -139,7 +139,7 @@ export function DiffViewer({ files, comments }: DiffViewerProps) {
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                               <path d="m12 3-1.912 5.886H3.82l4.992 3.63L6.9 18.4 12 14.77l5.1 3.63-1.912-5.884 4.992-3.63h-6.268Z" />
                                             </svg>
-                                            AI Reviewer
+                                            审阅建议
                                           </div>
                                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                             <span 
@@ -172,13 +172,13 @@ export function DiffViewer({ files, comments }: DiffViewerProps) {
                                         {comment.codeSuggestion && (
                                           <div className="inline-review-suggestion">
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                              <span className="inline-review-suggestion-title">Proposed Fix</span>
+                                              <span className="inline-review-suggestion-title">推荐修复代码</span>
                                               <button 
                                                 className="btn btn-secondary" 
                                                 style={{ padding: '4px 8px', fontSize: '0.7rem' }}
                                                 onClick={() => copyToClipboard(comment.codeSuggestion!)}
                                               >
-                                                Copy suggestion
+                                                复制建议
                                               </button>
                                             </div>
                                             <div style={{ display: 'flex', flexDirection: 'column', borderRadius: '6px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.8rem', fontFamily: 'var(--font-mono)' }}>
@@ -209,14 +209,14 @@ export function DiffViewer({ files, comments }: DiffViewerProps) {
                 </table>
               ) : (
                 <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
-                  No changes or diff content available for this file (e.g. binary file or empty patch).
+                  此文件暂无代码变更或差异对比内容（二进制文件或空补丁）。
                 </div>
               )}
             </div>
           </div>
         ) : (
           <GlassCard style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px' }}>
-            <span style={{ color: 'var(--color-text-secondary)' }}>Select a file on the left to inspect code changes</span>
+            <span style={{ color: 'var(--color-text-secondary)' }}>请在左侧文件列表中选择文件以查看具体的代码变更</span>
           </GlassCard>
         )}
       </div>
