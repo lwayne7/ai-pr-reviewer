@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { AIReviewComment, SeverityType, CategoryType } from '../types';
+import { AIReviewComment, SeverityType, CategoryType, PRFile } from '../types';
 import { GlassCard } from './GlassCard';
-import { submitPRReview } from '../services/github';
+import { submitPRReview, parsePatch } from '../services/github';
 
 interface ReviewPanelProps {
   comments: AIReviewComment[];
+  files: PRFile[];
   owner: string;
   repo: string;
   pullNumber: number;
@@ -14,6 +15,7 @@ interface ReviewPanelProps {
 
 export function ReviewPanel({
   comments,
+  files,
   owner,
   repo,
   pullNumber,
@@ -66,12 +68,49 @@ export function ReviewPanel({
     setIsSubmitting(true);
     setSubmitStatus(null);
 
-    // Map comments to the structure required by the GitHub API helper
-    const apiComments = comments.map(c => ({
-      path: c.filename,
-      line: c.line,
-      body: `**[AI Code Review - ${c.severity.toUpperCase()} (${c.category.toUpperCase()})]**: ${c.title}\n\n${c.description}${c.codeSuggestion ? `\n\n\`\`\`suggestion\n${c.codeSuggestion}\n\`\`\`` : ''}`
-    }));
+    // 1. Build a map of valid right-side lines from the diff patches to prevent 422 errors on incorrect line numbers
+    const validLinesMap = files.reduce((acc, file) => {
+      const hunks = parsePatch(file.patch);
+      const validLines = new Set<number>();
+      for (const hunk of hunks) {
+        for (const line of hunk.lines) {
+          if ((line.type === 'addition' || line.type === 'normal') && line.rightLineNum !== undefined) {
+            validLines.add(line.rightLineNum);
+          }
+        }
+      }
+      acc[file.filename] = validLines;
+      return acc;
+    }, {} as Record<string, Set<number>>);
+
+    // 2. Validate and partition comments into inline review comments and general comments
+    const validApiComments: Array<{ path: string; line: number; body: string }> = [];
+    const unmappedComments: AIReviewComment[] = [];
+
+    for (const c of comments) {
+      const fileValidLines = validLinesMap[c.filename];
+      const isLineValid = fileValidLines && fileValidLines.has(c.line);
+
+      if (isLineValid) {
+        validApiComments.push({
+          path: c.filename,
+          line: c.line,
+          body: `**[AI Code Review - ${c.severity.toUpperCase()} (${c.category.toUpperCase()})]**: ${c.title}\n\n${c.description}${c.codeSuggestion ? `\n\n\`\`\`suggestion\n${c.codeSuggestion}\n\`\`\`` : ''}`
+        });
+      } else {
+        unmappedComments.push(c);
+      }
+    }
+
+    // 3. Construct review summary body, appending unmapped/hallucinated comments so they aren't lost
+    let finalSummary = `### AI PR Review Report\n\n${aiSummaryMarkdown}\n\n*Review comments posted automatically by AI PR Reviewer.*`;
+    
+    if (unmappedComments.length > 0) {
+      finalSummary += `\n\n---\n\n### ⚠️ General / Unmapped Suggestions\n*The following recommendations could not be pinned to a specific line in the diff patch (e.g. line outside the diff hunks or file not found):*\n\n` + 
+        unmappedComments.map((c, idx) => {
+          return `${idx + 1}. **[${c.filename}:L${c.line}] (${c.severity.toUpperCase()} / ${c.category.toUpperCase()})**: **${c.title}**\n   ${c.description}${c.codeSuggestion ? `\n   \`\`\`suggestion\n   ${c.codeSuggestion}\n   \`\`\`` : ''}`;
+        }).join('\n\n');
+    }
 
     try {
       await submitPRReview(
@@ -79,12 +118,12 @@ export function ReviewPanel({
         repo,
         pullNumber,
         githubToken,
-        `### AI PR Review Report\n\n${aiSummaryMarkdown}\n\n*Review comments posted automatically by AI PR Reviewer.*`,
-        apiComments
+        finalSummary,
+        validApiComments
       );
       setSubmitStatus({
         success: true,
-        message: `Successfully posted review with ${comments.length} comments to PR #${pullNumber}!`
+        message: `Successfully posted review to PR #${pullNumber}! (${validApiComments.length} inline comments posted, ${unmappedComments.length} general suggestions appended to summary)`
       });
     } catch (error: any) {
       setSubmitStatus({
