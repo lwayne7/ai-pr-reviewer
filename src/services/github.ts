@@ -1,4 +1,4 @@
-import { PRInfo, PRFile, DiffHunk, DiffLine } from '../types';
+import { PRInfo, PRFile, DiffHunk } from '../types';
 
 /**
  * Parses a GitHub PR URL to extract owner, repo, and pull number.

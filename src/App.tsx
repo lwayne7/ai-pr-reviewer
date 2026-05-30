@@ -10,8 +10,6 @@ import { GlassCard } from './components/GlassCard';
 
 export function App() {
   const [githubToken, setGithubToken] = useState('');
-  const [geminiApiKey, setGeminiApiKey] = useState('');
-  const [prUrl, setPrUrl] = useState('');
   const [selectedModel, setSelectedModel] = useState('gemini-2.5-flash');
 
   const [prInfo, setPrInfo] = useState<PRInfo | null>(null);
@@ -29,8 +27,6 @@ export function App() {
     setIsLoading(true);
     setError('');
     setGithubToken(creds.githubToken);
-    setGeminiApiKey(creds.geminiApiKey);
-    setPrUrl(url);
 
     const parsed = parsePRUrl(url);
     if (!parsed) {

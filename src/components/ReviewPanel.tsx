@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AIReviewComment, SeverityType, CategoryType } from '../types';
 import { GlassCard } from './GlassCard';
 import { submitPRReview } from '../services/github';

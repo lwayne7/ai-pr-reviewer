@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PRFile, AIReviewComment, DiffHunk, DiffLine } from '../types';
+import { PRFile, AIReviewComment } from '../types';
 import { parsePatch } from '../services/github';
 import { GlassCard } from './GlassCard';
 

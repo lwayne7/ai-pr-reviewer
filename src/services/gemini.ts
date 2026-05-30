@@ -1,4 +1,4 @@
-import { GoogleGenAI } from '@google/generative-ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { PRInfo, PRFile, PRReviewResult } from '../types';
 
 /**
@@ -8,13 +8,11 @@ export async function validateGeminiKey(apiKey: string): Promise<boolean> {
   if (!apiKey || apiKey.trim() === '') return false;
   
   try {
-    const ai = new GoogleGenAI({ apiKey });
+    const ai = new GoogleGenerativeAI(apiKey);
     // Use gemini-2.5-flash as the check model
     const model = ai.getGenerativeModel({ model: 'gemini-2.5-flash' });
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: 'Ping' }] }]
-    });
-    return !!result.response.text;
+    const result = await model.generateContent('Ping');
+    return !!result.response.text();
   } catch (error) {
     console.error('Error validating Gemini key:', error);
     return false;
@@ -30,8 +28,7 @@ export async function analyzePR(
   apiKey: string,
   modelName: string = 'gemini-2.5-flash'
 ): Promise<PRReviewResult> {
-  const ai = new GoogleGenAI({ apiKey });
-  const model = ai.getGenerativeModel({ model: modelName });
+  const ai = new GoogleGenerativeAI(apiKey);
   
   // Format the file diff data to feed into the model
   const filesDiffData = files
@@ -64,6 +61,8 @@ CRITICAL RULES FOR REVIEW:
    - critical: Severe logic bugs, memory leaks, credential exposure, security vulnerabilities (SQL injection, XSS, SSRF), or crashes.
    - warning: Sub-optimal performance, unhandled error cases, API deprecation, or potential race conditions.
    - info: Refactoring ideas, code readability enhancements, or minor cleanups.`;
+
+  const model = ai.getGenerativeModel({ model: modelName, systemInstruction });
 
   const userPrompt = `Pull Request Details:
 Repository: ${prInfo.owner}/${prInfo.repo}
@@ -147,15 +146,14 @@ Ensure all JSON comments map correctly to filenames and rightLineNum (line) from
   try {
     const response = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-      config: {
-        systemInstruction,
+      generationConfig: {
         responseMimeType: 'application/json',
         responseSchema: responseSchema as any,
         temperature: 0.1, // Keep temp low to reduce hallucinations and ensure structured conformance
       }
     });
 
-    const responseText = response.text;
+    const responseText = response.response.text();
     if (!responseText) {
       throw new Error('Empty response received from Gemini API');
     }
