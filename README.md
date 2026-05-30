@@ -42,7 +42,7 @@ npm install
 
 ```env
 # 阿里云百炼 API Key (sk-...)
-ALIYUN_API_KEY=sk-9c20d8db1e9747c297c36205eb6e5320
+ALIYUN_API_KEY=YOUR_ALIYUN_API_KEY
 PORT=3001
 ```
 
