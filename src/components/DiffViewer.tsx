@@ -172,7 +172,7 @@ export function DiffViewer({ files, comments }: DiffViewerProps) {
                                         {comment.codeSuggestion && (
                                           <div className="inline-review-suggestion">
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                              <span className="inline-review-suggestion-title">Suggested Change</span>
+                                              <span className="inline-review-suggestion-title">Proposed Fix</span>
                                               <button 
                                                 className="btn btn-secondary" 
                                                 style={{ padding: '4px 8px', fontSize: '0.7rem' }}
@@ -181,7 +181,18 @@ export function DiffViewer({ files, comments }: DiffViewerProps) {
                                                 Copy suggestion
                                               </button>
                                             </div>
-                                            <pre className="inline-review-code"><code>{comment.codeSuggestion}</code></pre>
+                                            <div style={{ display: 'flex', flexDirection: 'column', borderRadius: '6px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.8rem', fontFamily: 'var(--font-mono)' }}>
+                                              {/* Original Code */}
+                                              <div style={{ display: 'flex', background: 'rgba(239, 68, 68, 0.08)', padding: '6px 12px', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                                                <span style={{ color: 'var(--color-critical)', marginRight: '12px', userSelect: 'none', width: '10px' }}>-</span>
+                                                <span style={{ color: '#fca5a5', whiteSpace: 'pre-wrap', wordBreak: 'break-all', flex: 1 }}>{line.content}</span>
+                                              </div>
+                                              {/* Suggested Code */}
+                                              <div style={{ display: 'flex', background: 'rgba(16, 185, 129, 0.08)', padding: '6px 12px' }}>
+                                                <span style={{ color: 'var(--color-success)', marginRight: '12px', userSelect: 'none', width: '10px' }}>+</span>
+                                                <span style={{ color: '#a7f3d0', whiteSpace: 'pre-wrap', wordBreak: 'break-all', flex: 1 }}>{comment.codeSuggestion}</span>
+                                              </div>
+                                            </div>
                                           </div>
                                         )}
                                       </div>
