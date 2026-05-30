@@ -4,7 +4,7 @@ import { PRSummary } from './components/PRSummary';
 import { DiffViewer } from './components/DiffViewer';
 import { ReviewPanel } from './components/ReviewPanel';
 import { fetchPRDetails, fetchPRFiles, parsePRUrl } from './services/github';
-import { analyzePR } from './services/gemini';
+import { analyzePR } from './services/ai';
 import { PRInfo, PRFile, PRReviewResult, CachedReview } from './types';
 import { GlassCard } from './components/GlassCard';
 import { HistoryList } from './components/HistoryList';
@@ -12,7 +12,7 @@ import { getReviewHistory, saveReviewToHistory, clearReviewHistory } from './ser
 
 export function App() {
   const [githubToken, setGithubToken] = useState('');
-  const [selectedModel, setSelectedModel] = useState('gemini-2.5-flash');
+  const [selectedModel, setSelectedModel] = useState('qwen-plus');
 
   const [prInfo, setPrInfo] = useState<PRInfo | null>(null);
   const [files, setFiles] = useState<PRFile[]>([]);
@@ -40,7 +40,7 @@ export function App() {
   };
 
   const handleSetupComplete = async (
-    creds: { githubToken: string; geminiApiKey: string },
+    creds: { githubToken: string },
     url: string
   ) => {
     setIsLoading(true);
@@ -63,8 +63,8 @@ export function App() {
       const prFiles = await fetchPRFiles(parsed.owner, parsed.repo, parsed.pullNumber, creds.githubToken);
       setFiles(prFiles);
 
-      // 3. Analyze code changes using Gemini model
-      const result = await analyzePR(info, prFiles, creds.geminiApiKey, selectedModel);
+      // 3. Analyze code changes using backend AI service (Aliyun Qwen)
+      const result = await analyzePR(info, prFiles, selectedModel);
       setReviewResult(result);
       
       // Save to local history
@@ -129,8 +129,9 @@ export function App() {
               style={{ padding: '6px 12px', fontSize: '0.85rem', width: 'auto', background: 'rgba(0,0,0,0.5)', cursor: 'pointer' }}
               disabled={isLoading || !!reviewResult}
             >
-              <option value="gemini-2.5-flash">Gemini 2.5 Flash (Fast)</option>
-              <option value="gemini-1.5-pro">Gemini 1.5 Pro (Deep Reasoning)</option>
+              <option value="qwen-plus">Qwen-Plus (Fast)</option>
+              <option value="qwen-max">Qwen-Max (Deep Reasoning)</option>
+              <option value="qwen2.5-coder-32b-instruct">Qwen2.5 Coder 32B (Elite)</option>
             </select>
           </div>
 
@@ -249,7 +250,7 @@ export function App() {
                 fontSize: '0.8rem',
                 color: 'var(--color-text-muted)'
               }}>
-                <strong>Privacy Info:</strong> Your API keys and source code diffs are processed directly client-side. Key details are saved locally in your browser and never transit to third-party database servers.
+                <strong>Privacy Info:</strong> Your Aliyun API Key is securely stored on the backend server. PR diff contents are processed and proxied through your local server directly to Aliyun Qwen.
               </div>
             </GlassCard>
           </div>

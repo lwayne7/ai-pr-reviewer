@@ -1,61 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { GlassCard } from './GlassCard';
 import { parsePRUrl } from '../services/github';
-import { validateGeminiKey } from '../services/gemini';
 
 interface SetupFormProps {
-  onSetupComplete: (credentials: { githubToken: string; geminiApiKey: string }, prUrl: string) => void;
+  onSetupComplete: (credentials: { githubToken: string }, prUrl: string) => void;
   isLoading: boolean;
 }
 
 export function SetupForm({ onSetupComplete, isLoading }: SetupFormProps) {
   const [githubToken, setGithubToken] = useState('');
-  const [geminiApiKey, setGeminiApiKey] = useState('');
   const [prUrl, setPrUrl] = useState('');
-  const [isGeminiValid, setIsGeminiValid] = useState<boolean | null>(null);
-  const [isValidatingKey, setIsValidatingKey] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
   // Load saved credentials on mount
   useEffect(() => {
     const savedToken = localStorage.getItem('ai_pr_reviewer_github_token');
-    const savedGeminiKey = localStorage.getItem('ai_pr_reviewer_gemini_key');
     if (savedToken) setGithubToken(savedToken);
-    if (savedGeminiKey) {
-      setGeminiApiKey(savedGeminiKey);
-      // Auto validate if key exists
-      validateGeminiKey(savedGeminiKey).then(valid => setIsGeminiValid(valid));
-    }
   }, []);
-
-  const handleValidateGeminiKey = async () => {
-    if (!geminiApiKey) return;
-    setIsValidatingKey(true);
-    setErrorMsg('');
-    try {
-      const valid = await validateGeminiKey(geminiApiKey);
-      setIsGeminiValid(valid);
-      if (valid) {
-        localStorage.setItem('ai_pr_reviewer_gemini_key', geminiApiKey);
-      } else {
-        setErrorMsg('Invalid Gemini API Key. Please verify and try again.');
-      }
-    } catch (e) {
-      setIsGeminiValid(false);
-      setErrorMsg('Failed to validate key. Network error or invalid API endpoints.');
-    } finally {
-      setIsValidatingKey(false);
-    }
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
-
-    if (!geminiApiKey) {
-      setErrorMsg('Gemini API Key is required for review analysis.');
-      return;
-    }
 
     const prInfo = parsePRUrl(prUrl);
     if (!prInfo) {
@@ -64,14 +29,13 @@ export function SetupForm({ onSetupComplete, isLoading }: SetupFormProps) {
     }
 
     // Save tokens
-    localStorage.setItem('ai_pr_reviewer_gemini_key', geminiApiKey);
     if (githubToken) {
       localStorage.setItem('ai_pr_reviewer_github_token', githubToken);
     } else {
       localStorage.removeItem('ai_pr_reviewer_github_token');
     }
 
-    onSetupComplete({ githubToken, geminiApiKey }, prUrl);
+    onSetupComplete({ githubToken }, prUrl);
   };
 
   return (
@@ -85,45 +49,6 @@ export function SetupForm({ onSetupComplete, isLoading }: SetupFormProps) {
       </h2>
 
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label className="form-label" htmlFor="gemini-key">
-            Gemini API Key *
-          </label>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <input
-              id="gemini-key"
-              type="password"
-              className="form-input"
-              placeholder="AIzaSy..."
-              value={geminiApiKey}
-              onChange={(e) => {
-                setGeminiApiKey(e.target.value);
-                setIsGeminiValid(null);
-              }}
-              required
-            />
-            <button
-              type="button"
-              className="btn btn-secondary"
-              style={{ padding: '8px 16px', fontSize: '0.875rem' }}
-              onClick={handleValidateGeminiKey}
-              disabled={isValidatingKey || !geminiApiKey}
-            >
-              {isValidatingKey ? 'Validating...' : 'Verify'}
-            </button>
-          </div>
-          {isGeminiValid === true && (
-            <span style={{ fontSize: '0.75rem', color: 'var(--color-success)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              ✓ Gemini Key Validated
-            </span>
-          )}
-          {isGeminiValid === false && (
-            <span style={{ fontSize: '0.75rem', color: 'var(--color-critical)', marginTop: '4px' }}>
-              ✗ Invalid API Key
-            </span>
-          )}
-        </div>
-
         <div className="form-group">
           <label className="form-label" htmlFor="github-token">
             GitHub Personal Access Token (PAT)
