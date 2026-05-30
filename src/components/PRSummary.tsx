@@ -1,4 +1,3 @@
-import React from 'react';
 import { PRInfo, AIReviewSummary } from '../types';
 import { GlassCard } from './GlassCard';
 
