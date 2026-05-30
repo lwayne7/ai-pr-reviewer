@@ -22,15 +22,34 @@ export function ReviewPanel({
 }: ReviewPanelProps) {
   const [selectedSeverity, setSelectedSeverity] = useState<SeverityType | 'all'>('all');
   const [selectedCategory, setSelectedCategory] = useState<CategoryType | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'severity' | 'line'>('severity');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ success: boolean; message: string } | null>(null);
 
-  // Filters
-  const filteredComments = comments.filter(c => {
-    const severityMatch = selectedSeverity === 'all' || c.severity === selectedSeverity;
-    const categoryMatch = selectedCategory === 'all' || c.category === selectedCategory;
-    return severityMatch && categoryMatch;
-  });
+  // Filters & Sorting
+  const filteredComments = comments
+    .filter(c => {
+      const severityMatch = selectedSeverity === 'all' || c.severity === selectedSeverity;
+      const categoryMatch = selectedCategory === 'all' || c.category === selectedCategory;
+      const query = searchQuery.toLowerCase().trim();
+      const searchMatch = query === '' ||
+        c.title.toLowerCase().includes(query) ||
+        c.description.toLowerCase().includes(query) ||
+        c.filename.toLowerCase().includes(query);
+      return severityMatch && categoryMatch && searchMatch;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'line') {
+        if (a.filename !== b.filename) {
+          return a.filename.localeCompare(b.filename);
+        }
+        return a.line - b.line;
+      } else {
+        const priority: Record<string, number> = { critical: 1, warning: 2, info: 3 };
+        return (priority[a.severity] || 3) - (priority[b.severity] || 3);
+      }
+    });
 
   const getSeverityColor = (severity: string) => {
     if (severity === 'critical') return 'var(--color-critical)';
@@ -128,11 +147,32 @@ export function ReviewPanel({
 
       {/* Filters Card */}
       <GlassCard style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <h3 style={{ fontSize: '1.05rem' }}>AI Recommendations ({filteredComments.length})</h3>
           <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
             Showing {filteredComments.length} of {comments.length} issues
           </span>
+        </div>
+
+        {/* Search & Sort Controls */}
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <input
+            type="text"
+            className="form-input"
+            style={{ padding: '8px 12px', fontSize: '0.85rem', flex: 1, minWidth: '200px' }}
+            placeholder="Search suggestions by keyword, file path..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <select
+            className="form-input"
+            style={{ padding: '8px 12px', fontSize: '0.85rem', width: '180px', cursor: 'pointer' }}
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+          >
+            <option value="severity">Sort: Severity First</option>
+            <option value="line">Sort: Line Number</option>
+          </select>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
