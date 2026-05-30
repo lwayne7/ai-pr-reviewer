@@ -28,6 +28,7 @@ export function ReviewPanel({
   const [sortBy, setSortBy] = useState<'severity' | 'line'>('severity');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ success: boolean; message: string } | null>(null);
+  const [activeToken, setActiveToken] = useState(githubToken || localStorage.getItem('ai_pr_reviewer_github_token') || '');
 
   // Filters & Sorting
   const filteredComments = comments
@@ -60,8 +61,8 @@ export function ReviewPanel({
   };
 
   const handlePostReview = async () => {
-    if (!githubToken) {
-      alert('GitHub Personal Access Token is required to post reviews. Please enter it in the setup configuration.');
+    if (!activeToken) {
+      alert('GitHub Personal Access Token is required to post reviews. Please enter it below.');
       return;
     }
     
@@ -117,7 +118,7 @@ export function ReviewPanel({
         owner,
         repo,
         pullNumber,
-        githubToken,
+        activeToken,
         finalSummary,
         validApiComments
       );
@@ -139,14 +140,31 @@ export function ReviewPanel({
     <div className="review-panel-container">
       {/* GitHub Actions Card */}
       <GlassCard style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-        <div>
+        <div style={{ flex: 1, minWidth: '280px' }}>
           <h3 style={{ fontSize: '1.05rem', color: 'var(--color-text-primary)' }}>GitHub Integration</h3>
-          <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '4px' }}>
-            {githubToken 
+          <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '4px', marginBottom: activeToken ? '0' : '12px' }}>
+            {activeToken 
               ? 'GitHub Access Token is set. You can publish this review directly to the PR.' 
-              : 'Provide a GitHub Token in the config to sync comments directly back to your PR.'
+              : 'Enter a GitHub Token below to enable direct PR syncing and bypass rate limits.'
             }
           </p>
+          {!githubToken && (
+            <input
+              type="password"
+              className="form-input"
+              style={{ padding: '8px 12px', fontSize: '0.85rem', maxWidth: '300px' }}
+              placeholder="GitHub Personal Access Token (ghp_...)"
+              value={activeToken}
+              onChange={(e) => {
+                setActiveToken(e.target.value);
+                if (e.target.value) {
+                  localStorage.setItem('ai_pr_reviewer_github_token', e.target.value);
+                } else {
+                  localStorage.removeItem('ai_pr_reviewer_github_token');
+                }
+              }}
+            />
+          )}
         </div>
 
         <button
