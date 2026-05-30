@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SetupForm } from './components/SetupForm';
 import { PRSummary } from './components/PRSummary';
 import { DiffViewer } from './components/DiffViewer';
 import { ReviewPanel } from './components/ReviewPanel';
 import { fetchPRDetails, fetchPRFiles, parsePRUrl } from './services/github';
 import { analyzePR } from './services/gemini';
-import { PRInfo, PRFile, PRReviewResult } from './types';
+import { PRInfo, PRFile, PRReviewResult, CachedReview } from './types';
 import { GlassCard } from './components/GlassCard';
+import { HistoryList } from './components/HistoryList';
+import { getReviewHistory, saveReviewToHistory, clearReviewHistory } from './services/history';
 
 export function App() {
   const [githubToken, setGithubToken] = useState('');
@@ -19,6 +21,23 @@ export function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'summary' | 'diff' | 'suggestions'>('summary');
   const [error, setError] = useState('');
+  const [history, setHistory] = useState<CachedReview[]>([]);
+
+  useEffect(() => {
+    setHistory(getReviewHistory());
+  }, []);
+
+  const handleSelectHistory = (cached: CachedReview) => {
+    setPrInfo(cached.prInfo);
+    setFiles(cached.files);
+    setReviewResult(cached.result);
+    setActiveTab('summary');
+  };
+
+  const handleClearHistory = () => {
+    clearReviewHistory();
+    setHistory([]);
+  };
 
   const handleSetupComplete = async (
     creds: { githubToken: string; geminiApiKey: string },
@@ -47,6 +66,18 @@ export function App() {
       // 3. Analyze code changes using Gemini model
       const result = await analyzePR(info, prFiles, creds.geminiApiKey, selectedModel);
       setReviewResult(result);
+      
+      // Save to local history
+      const cachedReview: CachedReview = {
+        id: `${parsed.owner}/${parsed.repo}#${parsed.pullNumber}`,
+        prInfo: info,
+        files: prFiles,
+        result,
+        timestamp: Date.now()
+      };
+      saveReviewToHistory(cachedReview);
+      setHistory(getReviewHistory());
+
       setActiveTab('summary');
     } catch (e: any) {
       console.error(e);
@@ -131,7 +162,14 @@ export function App() {
         {!reviewResult ? (
           /* Landing Setup Screen */
           <div className="grid-dashboard">
-            <SetupForm onSetupComplete={handleSetupComplete} isLoading={isLoading} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <SetupForm onSetupComplete={handleSetupComplete} isLoading={isLoading} />
+              <HistoryList 
+                history={history} 
+                onSelectReview={handleSelectHistory} 
+                onClearAll={handleClearHistory} 
+              />
+            </div>
             
             <GlassCard style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <h2 style={{ fontSize: '1.25rem', color: 'var(--color-accent)' }}>AI Code Review Assistance</h2>
