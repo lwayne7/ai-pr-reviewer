@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AIReviewComment, SeverityType, CategoryType, PRFile } from '../types';
 import { GlassCard } from './GlassCard';
 import { submitPRReview, parsePatch } from '../services/github';
+import { renderMarkdown } from '../services/markdown';
 
 const severityMap: Record<SeverityType, string> = {
   critical: '严重',
@@ -59,6 +60,47 @@ export function ReviewPanel({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ success: boolean; message: string } | null>(null);
   const [activeToken, setActiveToken] = useState(githubToken || localStorage.getItem('ai_pr_reviewer_github_token') || '');
+
+  const getCategoryIcon = (category: string) => {
+    const strokeWidth = 2.2;
+    if (category === 'security') {
+      return (
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle' }}>
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+      );
+    }
+    if (category === 'performance') {
+      return (
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle' }}>
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+        </svg>
+      );
+    }
+    if (category === 'style') {
+      return (
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle' }}>
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+        </svg>
+      );
+    }
+    if (category === 'logic') {
+      return (
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle' }}>
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+        </svg>
+      );
+    }
+    return (
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle' }}>
+        <circle cx="12" cy="12" r="10" />
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+        <line x1="12" x2="12.01" y1="17" y2="17" />
+      </svg>
+    );
+  };
 
   // Filters & Sorting
   const filteredComments = comments
@@ -315,7 +357,8 @@ export function ReviewPanel({
                   >
                     {severityMap[comment.severity] || comment.severity}
                   </span>
-                  <span className="badge badge-info" style={{ fontSize: '0.65rem' }}>
+                  <span className="badge badge-info" style={{ fontSize: '0.65rem', display: 'inline-flex', alignItems: 'center' }}>
+                    {getCategoryIcon(comment.category)}
                     {categoryMap[comment.category] || comment.category}
                   </span>
                 </div>
@@ -328,9 +371,9 @@ export function ReviewPanel({
                 <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '6px', color: 'var(--color-text-primary)' }}>
                   {comment.title}
                 </h4>
-                <p className="suggestion-desc">
-                  {comment.description}
-                </p>
+                <div style={{ fontSize: '0.9rem', lineHeight: '1.6', color: 'var(--color-text-secondary)' }}>
+                  {renderMarkdown(comment.description)}
+                </div>
               </div>
 
               {comment.codeSuggestion && (

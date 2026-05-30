@@ -1,5 +1,6 @@
 import { PRInfo, AIReviewSummary } from '../types';
 import { GlassCard } from './GlassCard';
+import { renderMarkdown } from '../services/markdown';
 
 interface PRSummaryProps {
   prInfo: PRInfo;
@@ -7,6 +8,46 @@ interface PRSummaryProps {
 }
 
 export function PRSummary({ prInfo, summary }: PRSummaryProps) {
+  const generateMarkdownReport = () => {
+    return `# 代码审查报告: ${prInfo.title} (#${prInfo.pullNumber})
+- **仓库**: ${prInfo.owner}/${prInfo.repo}
+- **提交作者**: ${prInfo.author}
+- **变更统计**: ${prInfo.changedFiles} 个文件被修改 (+${prInfo.additions} / -${prInfo.deletions})
+- **风险评级**: ${summary.riskScore}/100 (${summary.riskScore < 30 ? '低风险' : summary.riskScore < 70 ? '中风险' : '高风险'})
+
+---
+
+## 1. 变更概要评估
+${summary.overview}
+
+## 2. 架构冲击分析
+${summary.architecturalImpact}
+
+## 3. 核心修改点
+${summary.keyChanges.map((change, idx) => `${idx + 1}. ${change}`).join('\n')}
+
+## 4. 风险总结
+${summary.riskSummary}
+
+---
+*报告生成于智能代码评审助理*`;
+  };
+
+  const handleCopyReport = () => {
+    navigator.clipboard.writeText(generateMarkdownReport());
+    alert('完整的 Markdown 审查报告已成功复制到剪贴板！');
+  };
+
+  const handleDownloadReport = () => {
+    const blob = new Blob([generateMarkdownReport()], { type: 'text/markdown;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `PR_Review_Report_${prInfo.owner}_${prInfo.repo}_#${prInfo.pullNumber}.md`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
   // Determine risk category color
   const getRiskColor = (score: number) => {
     if (score < 30) return 'var(--color-success)';
@@ -42,15 +83,42 @@ export function PRSummary({ prInfo, summary }: PRSummaryProps) {
               <h1 className="pr-title">{prInfo.title}</h1>
             </div>
             
-            <a 
-              href={prInfo.htmlUrl} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="btn btn-secondary"
-              style={{ padding: '8px 12px', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
-            >
-              打开 PR ↗
-            </a>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button 
+                onClick={handleCopyReport} 
+                className="btn btn-secondary"
+                style={{ padding: '8px 12px', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
+                title="复制完整 Markdown 报告到剪贴板"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                  <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                </svg>
+                复制报告
+              </button>
+              <button 
+                onClick={handleDownloadReport} 
+                className="btn btn-secondary"
+                style={{ padding: '8px 12px', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
+                title="下载 Markdown 格式报告"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" x2="12" y1="15" y2="3" />
+                </svg>
+                下载报告
+              </button>
+              <a 
+                href={prInfo.htmlUrl} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="btn btn-secondary"
+                style={{ padding: '8px 12px', fontSize: '0.85rem', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center' }}
+              >
+                打开 PR ↗
+              </a>
+            </div>
           </div>
 
           <div className="pr-meta">
@@ -120,12 +188,12 @@ export function PRSummary({ prInfo, summary }: PRSummaryProps) {
         <GlassCard style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
             <h2 style={{ fontSize: '1.2rem', marginBottom: '8px', color: 'var(--color-accent)' }}>变更概要评估</h2>
-            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.95rem', lineHeight: '1.6' }}>{summary.overview}</p>
+            <div style={{ fontSize: '0.95rem', lineHeight: '1.6' }}>{renderMarkdown(summary.overview)}</div>
           </div>
 
           <div>
             <h2 style={{ fontSize: '1.2rem', marginBottom: '8px', color: 'var(--color-secondary)' }}>架构冲击分析</h2>
-            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.95rem', lineHeight: '1.6' }}>{summary.architecturalImpact}</p>
+            <div style={{ fontSize: '0.95rem', lineHeight: '1.6' }}>{renderMarkdown(summary.architecturalImpact)}</div>
           </div>
 
           <div>
@@ -133,7 +201,7 @@ export function PRSummary({ prInfo, summary }: PRSummaryProps) {
             <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {summary.keyChanges.map((change, idx) => (
                 <li key={idx} style={{ color: 'var(--color-text-secondary)', fontSize: '0.92rem', lineHeight: '1.5' }}>
-                  {change}
+                  {renderMarkdown(change)}
                 </li>
               ))}
             </ul>

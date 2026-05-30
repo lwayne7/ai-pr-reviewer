@@ -19,6 +19,7 @@ export function App() {
   const [reviewResult, setReviewResult] = useState<PRReviewResult | null>(null);
   
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState('');
   const [activeTab, setActiveTab] = useState<'summary' | 'diff' | 'suggestions'>('summary');
   const [error, setError] = useState('');
   const [history, setHistory] = useState<CachedReview[]>([]);
@@ -56,18 +57,22 @@ export function App() {
 
     try {
       // 1. Fetch Pull Request metadata
+      setLoadingStep('正在获取 PR 元数据信息...');
       const info = await fetchPRDetails(parsed.owner, parsed.repo, parsed.pullNumber, creds.githubToken);
       setPrInfo(info);
 
       // 2. Fetch Pull Request changed files
+      setLoadingStep('正在拉取代码变动的 Diff 文件差异...');
       const prFiles = await fetchPRFiles(parsed.owner, parsed.repo, parsed.pullNumber, creds.githubToken);
       setFiles(prFiles);
 
       // 3. Analyze code changes using backend AI service (Aliyun Qwen)
+      setLoadingStep('正在连接本地后端，提交至通义千问模型深度分析 (此步骤预计需要 5-15 秒)...');
       const result = await analyzePR(info, prFiles, selectedModel);
       setReviewResult(result);
       
       // Save to local history
+      setLoadingStep('分析完成！正在组装评审面板与缓存索引...');
       const cachedReview: CachedReview = {
         id: `${parsed.owner}/${parsed.repo}#${parsed.pullNumber}`,
         prInfo: info,
@@ -87,6 +92,7 @@ export function App() {
       setReviewResult(null);
     } finally {
       setIsLoading(false);
+      setLoadingStep('');
     }
   };
 
@@ -163,7 +169,41 @@ export function App() {
           </div>
         )}
 
-        {!reviewResult ? (
+        {isLoading ? (
+          <GlassCard style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '40px',
+            gap: '24px',
+            margin: '40px auto 0 auto',
+            maxWidth: '500px',
+            textAlign: 'center'
+          }}>
+            <div className="spinner" />
+            <div>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 655, marginBottom: '8px' }}>正在分析代码库</h3>
+              <p style={{ fontSize: '0.82rem', color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', minHeight: '24px' }}>
+                {loadingStep}
+              </p>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', textAlign: 'left', background: 'rgba(0,0,0,0.15)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.8rem', fontFamily: 'var(--font-mono)' }}>
+              <div style={{ color: loadingStep.includes('PR 元数据') ? 'var(--color-primary)' : (loadingStep === '' ? 'var(--color-text-muted)' : 'var(--color-success)') }}>
+                {loadingStep.includes('PR 元数据') ? '●' : '✓'} 1. 获取 Pull Request 信息
+              </div>
+              <div style={{ color: loadingStep.includes('Diff 文件') ? 'var(--color-primary)' : (loadingStep.includes('元数据') ? 'var(--color-text-muted)' : 'var(--color-success)') }}>
+                {loadingStep.includes('Diff 文件') ? '●' : (loadingStep.includes('元数据') ? '○' : '✓')} 2. 拉取 Patch 差异补丁
+              </div>
+              <div style={{ color: loadingStep.includes('通义千问') ? 'var(--color-primary)' : (loadingStep.includes('元数据') || loadingStep.includes('Diff') ? 'var(--color-text-muted)' : 'var(--color-success)') }}>
+                {loadingStep.includes('通义千问') ? '●' : (loadingStep.includes('元数据') || loadingStep.includes('Diff') ? '○' : '✓')} 3. 运行模型安全与架构评审
+              </div>
+              <div style={{ color: loadingStep.includes('分析完成') ? 'var(--color-primary)' : 'var(--color-text-muted)' }}>
+                {loadingStep.includes('分析完成') ? '●' : '○'} 4. 组装缓存与本地仪表盘
+              </div>
+            </div>
+          </GlassCard>
+        ) : !reviewResult ? (
           /* Restructured Centered Console Landing Layout */
           <div className="landing-centered-wrapper">
             <div style={{ textAlign: 'center', marginBottom: '8px' }}>
