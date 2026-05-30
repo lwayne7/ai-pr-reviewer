@@ -67,3 +67,11 @@ export interface PRReviewResult {
   summary: AIReviewSummary;
   comments: AIReviewComment[];
 }
+
+export interface CachedReview {
+  id: string; // "owner/repo#number"
+  prInfo: PRInfo;
+  files: PRFile[];
+  result: PRReviewResult;
+  timestamp: number;
+}
