@@ -11,6 +11,7 @@ export function SetupForm({ onSetupComplete, isLoading }: SetupFormProps) {
   const [githubToken, setGithubToken] = useState('');
   const [prUrl, setPrUrl] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Load saved credentials on mount
   useEffect(() => {
@@ -49,21 +50,7 @@ export function SetupForm({ onSetupComplete, isLoading }: SetupFormProps) {
       </h2>
 
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label className="form-label" htmlFor="github-token">
-            GitHub Personal Access Token (PAT)
-          </label>
-          <input
-            id="github-token"
-            type="password"
-            className="form-input"
-            placeholder="ghp_... (Recommended for private repos & rate limits)"
-            value={githubToken}
-            onChange={(e) => setGithubToken(e.target.value)}
-          />
-        </div>
-
-        <div className="form-group" style={{ marginBottom: '28px' }}>
+        <div className="form-group" style={{ marginBottom: '20px' }}>
           <label className="form-label" htmlFor="pr-url">
             GitHub Pull Request URL *
           </label>
@@ -77,6 +64,64 @@ export function SetupForm({ onSetupComplete, isLoading }: SetupFormProps) {
             required
           />
         </div>
+
+        <div style={{ marginBottom: '20px' }}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              padding: '0', 
+              fontSize: '0.85rem', 
+              color: 'var(--color-primary)', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '6px',
+              cursor: 'pointer',
+              fontWeight: 500,
+              boxShadow: 'none'
+            }}
+            onClick={() => setShowAdvanced(!showAdvanced)}
+          >
+            <svg 
+              width="14" 
+              height="14" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2.5" 
+              style={{ transform: showAdvanced ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }}
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+            {showAdvanced ? 'Hide Advanced Options' : 'Show Advanced Options (GitHub Auth Token)'}
+          </button>
+        </div>
+
+        {showAdvanced && (
+          <div className="form-group" style={{ 
+            marginTop: '8px', 
+            padding: '16px', 
+            background: 'rgba(255, 255, 255, 0.01)', 
+            border: '1px dashed rgba(255, 255, 255, 0.05)', 
+            borderRadius: '8px',
+            marginBottom: '20px'
+          }}>
+            <label className="form-label" htmlFor="github-token">
+              GitHub Personal Access Token (PAT)
+            </label>
+            <input
+              id="github-token"
+              type="password"
+              className="form-input"
+              style={{ marginTop: '6px' }}
+              placeholder="ghp_... (Only required for private repos or rate limits)"
+              value={githubToken}
+              onChange={(e) => setGithubToken(e.target.value)}
+            />
+          </div>
+        )}
 
         {errorMsg && (
           <div style={{
