@@ -129,9 +129,11 @@ export function App() {
               style={{ padding: '6px 12px', fontSize: '0.85rem', width: 'auto', background: 'rgba(0,0,0,0.5)', cursor: 'pointer' }}
               disabled={isLoading || !!reviewResult}
             >
-              <option value="qwen-plus">Qwen-Plus (Fast)</option>
-              <option value="qwen-max">Qwen-Max (Deep Reasoning)</option>
-              <option value="qwen2.5-coder-32b-instruct">Qwen2.5 Coder 32B (Elite)</option>
+              <option value="qwen-plus">qwen-plus (均衡性能版)</option>
+              <option value="qwen-max">qwen-max (旗舰超强版)</option>
+              <option value="qwen2.5-coder-72b-instruct">qwen2.5-coder-72b-instruct (最强代码专家)</option>
+              <option value="qwen2.5-coder-32b-instruct">qwen2.5-coder-32b-instruct (高效代码专家)</option>
+              <option value="qwen-turbo">qwen-turbo (极速轻量版)</option>
             </select>
           </div>
 
