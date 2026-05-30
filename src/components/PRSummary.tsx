@@ -89,12 +89,12 @@ export function PRSummary({ prInfo, summary }: PRSummaryProps) {
             </span>
           </div>
           {totalLines > 0 ? (
-            <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '3px', overflow: 'hidden', display: 'flex' }}>
-              <div style={{ width: `${additionsPercent}%`, background: 'var(--color-success)' }} />
-              <div style={{ width: `${deletionsPercent}%`, background: 'var(--color-critical)' }} />
+            <div style={{ height: '4px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '2px', overflow: 'hidden', display: 'flex', gap: '2px' }}>
+              <div style={{ width: `${additionsPercent}%`, background: 'var(--color-success)', borderRadius: '2px 0 0 2px' }} />
+              <div style={{ width: `${deletionsPercent}%`, background: 'var(--color-critical)', borderRadius: '0 2px 2px 0' }} />
             </div>
           ) : (
-            <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '3px' }} />
+            <div style={{ height: '4px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '2px' }} />
           )}
         </div>
 
@@ -140,41 +140,43 @@ export function PRSummary({ prInfo, summary }: PRSummaryProps) {
           </div>
         </GlassCard>
 
-        {/* AI Risk Analysis Card */}
-        <GlassCard style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '1.1rem', color: 'var(--color-text-primary)' }}>代码风险评级</h2>
+        {/* Polished Risk Telemetry Dial */}
+        <GlassCard style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px', textAlign: 'center', minWidth: '280px' }}>
+          <h2 style={{ fontSize: '1rem', color: 'var(--color-text-primary)', fontWeight: 600 }}>项目风险评估指数</h2>
           
-          {/* Risk Gauge Circle */}
-          <div style={{ position: 'relative', width: '130px', height: '130px', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center' }}>
-            {/* SVG circle gauge background */}
+          {/* Risk Gauge Circle with precise ticks */}
+          <div style={{ position: 'relative', width: '130px', height: '130px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="130" height="130" style={{ transform: 'rotate(-90deg)' }}>
+              {/* Telemetry Ticked Background Circle */}
               <circle 
                 cx="65" 
                 cy="65" 
-                r="54" 
+                r="52" 
                 fill="none" 
-                stroke="rgba(255, 255, 255, 0.05)" 
-                strokeWidth="8" 
+                stroke="rgba(255, 255, 255, 0.04)" 
+                strokeWidth="6" 
+                strokeDasharray="3 2"
               />
+              {/* Ticked Active Arc */}
               <circle 
                 cx="65" 
                 cy="65" 
-                r="54" 
+                r="52" 
                 fill="none" 
                 stroke={getRiskColor(summary.riskScore)} 
-                strokeWidth="8" 
-                strokeDasharray={2 * Math.PI * 54}
-                strokeDashoffset={2 * Math.PI * 54 * (1 - summary.riskScore / 100)}
-                strokeLinecap="round"
-                style={{ transition: 'stroke-dashoffset 1.5s ease-in-out', filter: `drop-shadow(0 0 6px ${getRiskColor(summary.riskScore)}50)` }}
+                strokeWidth="6" 
+                strokeDasharray={2 * Math.PI * 52}
+                strokeDashoffset={2 * Math.PI * 52 * (1 - summary.riskScore / 100)}
+                strokeLinecap="butt"
+                style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)' }}
               />
             </svg>
             <div style={{ position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <span style={{ fontSize: '2rem', fontWeight: 800, fontFamily: 'var(--font-display)', color: getRiskColor(summary.riskScore) }}>
+              <span style={{ fontSize: '2.25rem', fontWeight: 600, fontFamily: 'var(--font-mono)', color: getRiskColor(summary.riskScore), lineHeight: 1 }}>
                 {summary.riskScore}
               </span>
-              <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                风险指数 / 100
+              <span style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '6px' }}>
+                SCORE / 100
               </span>
             </div>
           </div>
@@ -183,18 +185,20 @@ export function PRSummary({ prInfo, summary }: PRSummaryProps) {
             <span 
               className="badge" 
               style={{ 
-                background: `${getRiskColor(summary.riskScore)}15`, 
+                background: 'rgba(255,255,255,0.02)',
                 color: getRiskColor(summary.riskScore),
-                border: `1px solid ${getRiskColor(summary.riskScore)}30`,
-                padding: '6px 14px',
-                fontSize: '0.8rem'
+                border: `1px solid ${getRiskColor(summary.riskScore)}25`,
+                padding: '4px 12px',
+                fontSize: '0.75rem',
+                borderRadius: '4px',
+                fontFamily: 'var(--font-mono)'
               }}
             >
               {getRiskLabel(summary.riskScore)}
             </span>
           </div>
 
-          <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', lineHeight: '1.5', padding: '0 8px' }}>
+          <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', lineHeight: '1.5', padding: '0 8px' }}>
             {summary.riskSummary}
           </p>
         </GlassCard>
