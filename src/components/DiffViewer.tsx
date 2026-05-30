@@ -29,6 +29,52 @@ export function DiffViewer({ files, comments }: DiffViewerProps) {
     return comments.filter(c => c.filename === filename).length;
   };
 
+  const getFileIcon = (filename: string) => {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    if (ext === 'tsx' || ext === 'jsx') {
+      return (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ minWidth: '15px', marginTop: '2px' }}>
+          <circle cx="12" cy="12" r="2" />
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+        </svg>
+      );
+    }
+    if (ext === 'ts' || ext === 'js') {
+      return (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ minWidth: '15px', marginTop: '2px' }}>
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <path d="M9 15h.01M12 15h.01M15 15h.01" />
+        </svg>
+      );
+    }
+    if (ext === 'css' || ext === 'html') {
+      return (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ minWidth: '15px', marginTop: '2px' }}>
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <path d="M16 13a4 4 0 0 1-8 0" />
+        </svg>
+      );
+    }
+    if (ext === 'json' || ext === 'md' || ext === 'yml' || ext === 'yaml') {
+      return (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ minWidth: '15px', marginTop: '2px' }}>
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="8" y1="13" x2="16" y2="13" />
+          <line x1="8" y1="17" x2="16" y2="17" />
+        </svg>
+      );
+    }
+    return (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ minWidth: '15px', marginTop: '2px' }}>
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+      </svg>
+    );
+  };
+
   const getSeverityColor = (severity: string) => {
     if (severity === 'critical') return 'var(--color-critical)';
     if (severity === 'warning') return 'var(--color-warning)';
@@ -55,28 +101,47 @@ export function DiffViewer({ files, comments }: DiffViewerProps) {
                 key={file.filename}
                 className={`file-item ${isActive ? 'active' : ''}`}
                 onClick={() => setSelectedFileIdx(idx)}
+                style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}
               >
-                <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1, paddingRight: '8px' }}>
-                  <span className="file-name" title={file.filename}>{file.filename}</span>
-                  <div className="file-stats">
-                    <span className="file-additions">+{file.additions}</span>
-                    <span style={{ color: 'var(--color-text-muted)' }}>/</span>
-                    <span className="file-deletions">-{file.deletions}</span>
-                  </div>
+                {getFileIcon(file.filename)}
+                <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1, paddingRight: '4px' }}>
+                  <span className="file-name" title={file.filename} style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', fontWeight: 550 }}>
+                    {file.filename.split('/').pop()}
+                  </span>
+                  <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={file.filename}>
+                    {file.filename.substring(0, file.filename.lastIndexOf('/')) || './'}
+                  </span>
                 </div>
                 
-                {commentCount > 0 && (
-                  <span 
-                    className="file-badge-issues"
-                    title={`${commentCount} AI suggestions`}
-                    style={{
-                      background: commentCount >= 3 ? 'var(--color-critical)' : 
-                                  commentCount >= 1 ? 'var(--color-warning)' : 'var(--color-primary)'
-                    }}
-                  >
-                    {commentCount}
-                  </span>
-                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', alignSelf: 'center' }}>
+                  <div className="file-stats" style={{ display: 'flex', gap: '4px', fontSize: '0.68rem', fontWeight: 500 }}>
+                    <span className="file-additions">+{file.additions}</span>
+                    <span className="file-deletions">-{file.deletions}</span>
+                  </div>
+                  
+                  {commentCount > 0 && (
+                    <span 
+                      className="file-badge-issues"
+                      title={`${commentCount} 条评审意见`}
+                      style={{
+                        background: commentCount >= 3 ? 'var(--color-critical)' : 
+                                    commentCount >= 1 ? 'var(--color-warning)' : 'var(--color-primary)',
+                        fontSize: '0.65rem',
+                        height: '16px',
+                        minWidth: '16px',
+                        borderRadius: '8px',
+                        padding: '0 4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#fff',
+                        fontWeight: 700
+                      }}
+                    >
+                      {commentCount}
+                    </span>
+                  )}
+                </div>
               </div>
             );
           })}

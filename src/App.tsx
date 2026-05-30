@@ -102,18 +102,19 @@ export function App() {
       {/* Premium Header */}
       <header className="app-header">
         <div className="brand">
-          <div className="brand-logo">
-            <svg viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
-              <line x1="12" y1="22" x2="12" y2="12" />
-              <line x1="12" y1="12" x2="22" y2="8.5" />
-              <line x1="12" y1="12" x2="2" y2="8.5" />
+          <div className="brand-logo" style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="18" cy="18" r="3" />
+              <circle cx="6" cy="6" r="3" />
+              <circle cx="6" cy="18" r="3" />
+              <path d="M6 9v6" />
+              <path d="M9 6h6a3 3 0 0 1 3 3v6" />
             </svg>
           </div>
           <div>
-            <h1 className="brand-title">AI PR REVIEWER</h1>
-            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textTransform: 'none', letterSpacing: '0.05em' }}>
-              开发团队智能审查助理
+            <h1 className="brand-title" style={{ letterSpacing: '-0.03em', fontWeight: 700 }}>PR Reviewer</h1>
+            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textTransform: 'none', letterSpacing: '0.03em' }}>
+              开发团队智能代码评审工具
             </span>
           </div>
         </div>
@@ -163,98 +164,93 @@ export function App() {
         )}
 
         {!reviewResult ? (
-          /* Landing Setup Screen */
-          <div className="grid-dashboard">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <SetupForm onSetupComplete={handleSetupComplete} isLoading={isLoading} />
-              <HistoryList 
-                history={history} 
-                onSelectReview={handleSelectHistory} 
-                onClearAll={handleClearHistory} 
-              />
-            </div>
-            
-            <GlassCard style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <h2 style={{ fontSize: '1.25rem', color: 'var(--color-accent)' }}>智能代码审查助理</h2>
-              <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.95rem', lineHeight: '1.6' }}>
-                输入任意 GitHub Pull Request 链接，拉取代码变更的 diff 补丁，并提交进行多阶段的深度安全、逻辑与架构风险评估。所有审查结果安全地在本地加载和缓存。
+          /* Restructured Centered Console Landing Layout */
+          <div className="landing-centered-wrapper">
+            <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+              <h2 style={{ fontSize: '1.75rem', fontWeight: 750, color: 'var(--color-text-primary)', letterSpacing: '-0.03em', marginBottom: '8px' }}>
+                代码审查，触手可及。
+              </h2>
+              <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.95rem', maxWidth: '520px', margin: '0 auto', lineHeight: '1.5' }}>
+                输入任意 GitHub Pull Request 链接，对代码变更的 diff 补丁进行安全、逻辑与架构风险评估。
               </p>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '8px' }}>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <div style={{ color: 'var(--color-primary)', marginTop: '2px' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="12" y1="16" x2="12" y2="12" />
-                      <line x1="12" y1="8" x2="12.01" y2="8" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>变更概要与架构评估</h4>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
-                      智能总结本次变更的功能要点，并分析其带来的架构冲击、API 变动和模块间依赖关系。
-                    </p>
-                  </div>
-                </div>
+            </div>
 
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <div style={{ color: 'var(--color-secondary)', marginTop: '2px' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
-                      <line x1="12" y1="9" x2="12" y2="13" />
-                      <line x1="12" y1="17" x2="12.01" y2="17" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>代码缺陷与安全风险排查</h4>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
-                      深度扫描逻辑缺陷、硬编码秘钥（API Token/密钥）、安全风险（SQL 注入/XSS）、并发竞争条件和效率瓶颈。
-                    </p>
-                  </div>
-                </div>
+            <SetupForm onSetupComplete={handleSetupComplete} isLoading={isLoading} />
+            
+            <HistoryList 
+              history={history} 
+              onSelectReview={handleSelectHistory} 
+              onClearAll={handleClearHistory} 
+            />
 
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <div style={{ color: 'var(--color-accent)', marginTop: '2px' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>文件差异行内对照标注</h4>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
-                      还原经典代码差异（Diff）对照视图，在被修改代码行下方就地渲染审查建议，并提供一键复制的重构方案。
-                    </p>
-                  </div>
+            {/* Premium 2x2 Feature Matrix Grid */}
+            <div className="features-grid">
+              <GlassCard className="feature-card">
+                <div style={{ color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                  </svg>
+                  <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>变更概要与架构评估</h4>
                 </div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', lineHeight: '1.5' }}>
+                  智能总结本次变更的功能要点，并分析其带来的架构冲击、API 变动和模块间依赖关系。
+                </p>
+              </GlassCard>
 
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <div style={{ color: 'var(--color-success)', marginTop: '2px' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
-                      <path d="m9 12 2 2 4-4" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>审查卡片一键同步</h4>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
-                      支持使用您自己的 GitHub 访问令牌，将审查大纲和行内评审卡片一键同步并提交到 GitHub Pull Request 官方评论区。
-                    </p>
-                  </div>
+              <GlassCard className="feature-card">
+                <div style={{ color: 'var(--color-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                  <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>安全与逻辑漏洞排查</h4>
                 </div>
-              </div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', lineHeight: '1.5' }}>
+                  深度扫描逻辑缺陷、硬编码秘钥（API Token/密钥）、安全风险（SQL 注入/XSS）、并发竞争条件和效率瓶颈。
+                </p>
+              </GlassCard>
 
-              <div style={{
-                marginTop: '16px',
-                padding: '12px 16px',
-                background: 'rgba(255, 255, 255, 0.02)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px',
-                fontSize: '0.8rem',
-                color: 'var(--color-text-muted)'
-              }}>
-                <strong>隐私说明：</strong> 您的阿里云 API 密钥安全地保存在您的本地后端服务中。PR 补丁内容均经由您本地启动的后端服务代理转发给 DashScope (通义千问) 模型进行处理。
-              </div>
-            </GlassCard>
+              <GlassCard className="feature-card">
+                <div style={{ color: 'var(--color-accent)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                  </svg>
+                  <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>文件差异行内对照标注</h4>
+                </div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', lineHeight: '1.5' }}>
+                  还原经典代码差异（Diff）对照视图，在被修改代码行下方就地渲染审查建议，并提供一键复制的重构方案。
+                </p>
+              </GlassCard>
+
+              <GlassCard className="feature-card">
+                <div style={{ color: 'var(--color-success)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                    <path d="m9 12 2 2 4-4" />
+                  </svg>
+                  <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>审查卡片一键同步</h4>
+                </div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', lineHeight: '1.5' }}>
+                  支持使用您自己的 GitHub 访问令牌，将审查大纲和行内评审卡片一键同步并提交到 GitHub Pull Request 官方评论区。
+                </p>
+              </GlassCard>
+            </div>
+
+            <div style={{
+              marginTop: '12px',
+              padding: '12px 16px',
+              background: 'rgba(255, 255, 255, 0.02)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px',
+              fontSize: '0.75rem',
+              color: 'var(--color-text-muted)',
+              textAlign: 'center'
+            }}>
+              <strong>隐私说明：</strong> 您的阿里云 API 密钥安全地保存在本地后端中。PR 补丁数据均通过您的本地服务器安全代理请求。
+            </div>
           </div>
         ) : (
           /* Active Review Workspace Screen */
