@@ -25,7 +25,7 @@ export function SetupForm({ onSetupComplete, isLoading }: SetupFormProps) {
 
     const prInfo = parsePRUrl(prUrl);
     if (!prInfo) {
-      setErrorMsg('Invalid Pull Request URL. Must match format: https://github.com/owner/repo/pull/number');
+      setErrorMsg('无效的 Pull Request 链接。格式必须匹配：https://github.com/owner/repo/pull/number');
       return;
     }
 
@@ -46,19 +46,19 @@ export function SetupForm({ onSetupComplete, isLoading }: SetupFormProps) {
           <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
           <circle cx="12" cy="12" r="3" />
         </svg>
-        Review Configuration
+        配置与连接
       </h2>
 
       <form onSubmit={handleSubmit}>
         <div className="form-group" style={{ marginBottom: '20px' }}>
           <label className="form-label" htmlFor="pr-url">
-            GitHub Pull Request URL *
+            GitHub Pull Request 链接 *
           </label>
           <input
             id="pr-url"
             type="url"
             className="form-input"
-            placeholder="https://github.com/owner/repo/pull/123"
+            placeholder="https://github.com/用户名/仓库名/pull/序号"
             value={prUrl}
             onChange={(e) => setPrUrl(e.target.value)}
             required
@@ -95,7 +95,7 @@ export function SetupForm({ onSetupComplete, isLoading }: SetupFormProps) {
             >
               <polyline points="9 18 15 12 9 6" />
             </svg>
-            {showAdvanced ? 'Hide Advanced Options' : 'Show Advanced Options (GitHub Auth Token)'}
+            {showAdvanced ? '隐藏高级选项' : '展开高级选项 (GitHub 认证 Token)'}
           </button>
         </div>
 
@@ -109,14 +109,14 @@ export function SetupForm({ onSetupComplete, isLoading }: SetupFormProps) {
             marginBottom: '20px'
           }}>
             <label className="form-label" htmlFor="github-token">
-              GitHub Personal Access Token (PAT)
+              GitHub 个人访问令牌 (PAT)
             </label>
             <input
               id="github-token"
               type="password"
               className="form-input"
               style={{ marginTop: '6px' }}
-              placeholder="ghp_... (Only required for private repos or rate limits)"
+              placeholder="ghp_... (仅私有仓库或达到速率限制时需要)"
               value={githubToken}
               onChange={(e) => setGithubToken(e.target.value)}
             />
@@ -146,7 +146,7 @@ export function SetupForm({ onSetupComplete, isLoading }: SetupFormProps) {
           {isLoading ? (
             <>
               <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderTopColor: '#fff', borderBottomColor: '#fff' }} />
-              Running Analysis...
+              正在分析代码变更...
             </>
           ) : (
             <>
@@ -155,7 +155,7 @@ export function SetupForm({ onSetupComplete, isLoading }: SetupFormProps) {
                 <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
                 <line x1="12" y1="22.08" x2="12" y2="12" />
               </svg>
-              Fetch & Review
+              拉取并开始审阅
             </>
           )}
         </button>

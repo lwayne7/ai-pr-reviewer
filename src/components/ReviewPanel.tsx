@@ -3,6 +3,36 @@ import { AIReviewComment, SeverityType, CategoryType, PRFile } from '../types';
 import { GlassCard } from './GlassCard';
 import { submitPRReview, parsePatch } from '../services/github';
 
+const severityMap: Record<SeverityType, string> = {
+  critical: '严重',
+  warning: '警告',
+  info: '建议'
+};
+
+const categoryMap: Record<CategoryType, string> = {
+  security: '安全',
+  performance: '性能',
+  style: '规范',
+  logic: '逻辑',
+  other: '其他'
+};
+
+const severityLabels: Record<string, string> = {
+  all: '全部级别',
+  critical: '严重 (Critical)',
+  warning: '警告 (Warning)',
+  info: '建议 (Info)'
+};
+
+const categoryLabels: Record<string, string> = {
+  all: '全部类型',
+  security: '安全',
+  performance: '性能',
+  style: '规范',
+  logic: '逻辑',
+  other: '其他'
+};
+
 interface ReviewPanelProps {
   comments: AIReviewComment[];
   files: PRFile[];
@@ -62,7 +92,7 @@ export function ReviewPanel({
 
   const handlePostReview = async () => {
     if (!activeToken) {
-      alert('GitHub Personal Access Token is required to post reviews. Please enter it below.');
+      alert('同步审查意见需要配置 GitHub 个人访问令牌，请在下方输入。');
       return;
     }
     
@@ -96,7 +126,7 @@ export function ReviewPanel({
         validApiComments.push({
           path: c.filename,
           line: c.line,
-          body: `**[AI Code Review - ${c.severity.toUpperCase()} (${c.category.toUpperCase()})]**: ${c.title}\n\n${c.description}${c.codeSuggestion ? `\n\n\`\`\`suggestion\n${c.codeSuggestion}\n\`\`\`` : ''}`
+          body: `**[代码审阅意见 - ${severityMap[c.severity] || c.severity} (${categoryMap[c.category] || c.category})]**: ${c.title}\n\n${c.description}${c.codeSuggestion ? `\n\n\`\`\`suggestion\n${c.codeSuggestion}\n\`\`\`` : ''}`
         });
       } else {
         unmappedComments.push(c);
@@ -104,12 +134,12 @@ export function ReviewPanel({
     }
 
     // 3. Construct review summary body, appending unmapped/hallucinated comments so they aren't lost
-    let finalSummary = `### AI PR Review Report\n\n${aiSummaryMarkdown}\n\n*Review comments posted automatically by AI PR Reviewer.*`;
+    let finalSummary = `### 智能代码审查报告\n\n${aiSummaryMarkdown}\n\n*本审查意见由智能代码评审助理自动生成。*`;
     
     if (unmappedComments.length > 0) {
-      finalSummary += `\n\n---\n\n### ⚠️ General / Unmapped Suggestions\n*The following recommendations could not be pinned to a specific line in the diff patch (e.g. line outside the diff hunks or file not found):*\n\n` + 
+      finalSummary += `\n\n---\n\n### ⚠️ 全局或未匹配行号的建议\n*以下建议未能定位到 diff 中的具体代码行（可能位于 diff 范围外，或对应的文件未找到）：*\n\n` + 
         unmappedComments.map((c, idx) => {
-          return `${idx + 1}. **[${c.filename}:L${c.line}] (${c.severity.toUpperCase()} / ${c.category.toUpperCase()})**: **${c.title}**\n   ${c.description}${c.codeSuggestion ? `\n   \`\`\`suggestion\n   ${c.codeSuggestion}\n   \`\`\`` : ''}`;
+          return `${idx + 1}. **[${c.filename}:L${c.line}] (${severityMap[c.severity] || c.severity} / ${categoryMap[c.category] || c.category})**: **${c.title}**\n   ${c.description}${c.codeSuggestion ? `\n   \`\`\`suggestion\n   ${c.codeSuggestion}\n   \`\`\`` : ''}`;
         }).join('\n\n');
     }
 
@@ -124,12 +154,12 @@ export function ReviewPanel({
       );
       setSubmitStatus({
         success: true,
-        message: `Successfully posted review to PR #${pullNumber}! (${validApiComments.length} inline comments posted, ${unmappedComments.length} general suggestions appended to summary)`
+        message: `成功同步审查意见到 PR #${pullNumber}！(已发送 ${validApiComments.length} 条行级评论，${unmappedComments.length} 条全局建议已随审查总结一同发布)`
       });
     } catch (error: any) {
       setSubmitStatus({
         success: false,
-        message: error.message || 'Failed to submit review to GitHub.'
+        message: error.message || '未能成功同步审查意见到 GitHub。'
       });
     } finally {
       setIsSubmitting(false);
@@ -141,11 +171,11 @@ export function ReviewPanel({
       {/* GitHub Actions Card */}
       <GlassCard style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ flex: 1, minWidth: '280px' }}>
-          <h3 style={{ fontSize: '1.05rem', color: 'var(--color-text-primary)' }}>GitHub Integration</h3>
+          <h3 style={{ fontSize: '1.05rem', color: 'var(--color-text-primary)' }}>GitHub 协同同步</h3>
           <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '4px', marginBottom: activeToken ? '0' : '12px' }}>
             {activeToken 
-              ? 'GitHub Access Token is set. You can publish this review directly to the PR.' 
-              : 'Enter a GitHub Token below to enable direct PR syncing and bypass rate limits.'
+              ? '已配置 GitHub 访问令牌。您可以直接将本次审查意见发布到 GitHub PR。' 
+              : '在下方配置 GitHub 访问令牌以启用直接同步，并避免 GitHub API 的速率限制。'
             }
           </p>
           {!githubToken && (
@@ -153,7 +183,7 @@ export function ReviewPanel({
               type="password"
               className="form-input"
               style={{ padding: '8px 12px', fontSize: '0.85rem', maxWidth: '300px' }}
-              placeholder="GitHub Personal Access Token (ghp_...)"
+              placeholder="输入 GitHub 个人访问令牌 (ghp_...)"
               value={activeToken}
               onChange={(e) => {
                 setActiveToken(e.target.value);
@@ -175,7 +205,7 @@ export function ReviewPanel({
           {isSubmitting ? (
             <>
               <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderTopColor: '#fff', borderBottomColor: '#fff' }} />
-              Submitting review...
+              正在提交审查意见...
             </>
           ) : (
             <>
@@ -183,7 +213,7 @@ export function ReviewPanel({
                 <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
                 <path d="M9 18c-4.51 2-5-2-7-2" />
               </svg>
-              Post Review to GitHub
+              同步到 GitHub PR
             </>
           )}
         </button>
@@ -205,9 +235,9 @@ export function ReviewPanel({
       {/* Filters Card */}
       <GlassCard style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <h3 style={{ fontSize: '1.05rem' }}>AI Recommendations ({filteredComments.length})</h3>
+          <h3 style={{ fontSize: '1.05rem' }}>审查意见列表 ({filteredComments.length})</h3>
           <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-            Showing {filteredComments.length} of {comments.length} issues
+            当前筛选显示出 {filteredComments.length} / {comments.length} 条建议
           </span>
         </div>
 
@@ -217,7 +247,7 @@ export function ReviewPanel({
             type="text"
             className="form-input"
             style={{ padding: '8px 12px', fontSize: '0.85rem', flex: 1, minWidth: '200px' }}
-            placeholder="Search suggestions by keyword, file path..."
+            placeholder="通过关键字、文件路径搜索意见..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -227,15 +257,15 @@ export function ReviewPanel({
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
           >
-            <option value="severity">Sort: Severity First</option>
-            <option value="line">Sort: Line Number</option>
+            <option value="severity">优先级排序 (严重度优先)</option>
+            <option value="line">代码位置排序 (行号优先)</option>
           </select>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {/* Severity Filters */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', minWidth: '70px' }}>Severity:</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', minWidth: '70px' }}>严重程度：</span>
             <div className="filter-bar">
               {['all', 'critical', 'warning', 'info'].map(sev => (
                 <button
@@ -243,7 +273,7 @@ export function ReviewPanel({
                   className={`filter-chip ${selectedSeverity === sev ? 'active' : ''}`}
                   onClick={() => setSelectedSeverity(sev as any)}
                 >
-                  {sev}
+                  {severityLabels[sev]}
                 </button>
               ))}
             </div>
@@ -251,7 +281,7 @@ export function ReviewPanel({
 
           {/* Category Filters */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', minWidth: '70px' }}>Category:</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', minWidth: '70px' }}>类型分类：</span>
             <div className="filter-bar">
               {['all', 'security', 'performance', 'style', 'logic', 'other'].map(cat => (
                 <button
@@ -259,7 +289,7 @@ export function ReviewPanel({
                   className={`filter-chip ${selectedCategory === cat ? 'active' : ''}`}
                   onClick={() => setSelectedCategory(cat as any)}
                 >
-                  {cat}
+                  {categoryLabels[cat]}
                 </button>
               ))}
             </div>
@@ -283,10 +313,10 @@ export function ReviewPanel({
                       fontSize: '0.65rem'
                     }}
                   >
-                    {comment.severity}
+                    {severityMap[comment.severity] || comment.severity}
                   </span>
                   <span className="badge badge-info" style={{ fontSize: '0.65rem' }}>
-                    {comment.category}
+                    {categoryMap[comment.category] || comment.category}
                   </span>
                 </div>
                 <span className="suggestion-filepath">
@@ -306,16 +336,16 @@ export function ReviewPanel({
               {comment.codeSuggestion && (
                 <div className="inline-review-suggestion" style={{ marginTop: '4px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <span className="inline-review-suggestion-title">Proposed Fix</span>
+                    <span className="inline-review-suggestion-title">推荐修复方案</span>
                     <button 
                       className="btn btn-secondary" 
                       style={{ padding: '4px 8px', fontSize: '0.7rem' }}
                       onClick={() => {
                         navigator.clipboard.writeText(comment.codeSuggestion!);
-                        alert('Copied suggestion to clipboard!');
+                        alert('修复建议代码已复制到剪贴板！');
                       }}
                     >
-                      Copy code
+                      复制建议代码
                     </button>
                   </div>
                   <pre className="inline-review-code"><code>{comment.codeSuggestion}</code></pre>
@@ -325,7 +355,7 @@ export function ReviewPanel({
           ))
         ) : (
           <GlassCard style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
-            No recommendations match the selected filters.
+            没有符合当前筛选条件的审查意见。
           </GlassCard>
         )}
       </div>

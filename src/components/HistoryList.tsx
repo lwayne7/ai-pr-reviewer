@@ -27,14 +27,14 @@ export function HistoryList({ history, onSelectReview, onClearAll }: HistoryList
             <path d="M3 3v5h5" />
             <path d="M12 7v5l4 2" />
           </svg>
-          Recent Reviews
+          历史审阅记录
         </h3>
         <button 
           className="btn btn-secondary" 
-          style={{ padding: '4px 8px', fontSize: '0.75rem', border: 'none', background: 'none', color: 'var(--color-text-muted)' }}
+          style={{ padding: '4px 8px', fontSize: '0.75rem', border: 'none', background: 'none', color: 'var(--color-text-muted)', cursor: 'pointer' }}
           onClick={onClearAll}
         >
-          Clear All
+          清除历史
         </button>
       </div>
 
@@ -93,7 +93,7 @@ export function HistoryList({ history, onSelectReview, onClearAll }: HistoryList
                   color: getRiskColor(item.result.summary.riskScore),
                   boxShadow: `0 0 10px ${getRiskColor(item.result.summary.riskScore)}10`
                 }}
-                title={`Risk Score: ${item.result.summary.riskScore}`}
+                title={`风险指数: ${item.result.summary.riskScore}`}
               >
                 {item.result.summary.riskScore}
               </div>

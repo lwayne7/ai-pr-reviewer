@@ -49,7 +49,7 @@ export function App() {
 
     const parsed = parsePRUrl(url);
     if (!parsed) {
-      setError('Invalid Pull Request URL');
+      setError('无效的 Pull Request 链接。请确保链接格式正确。');
       setIsLoading(false);
       return;
     }
@@ -81,7 +81,7 @@ export function App() {
       setActiveTab('summary');
     } catch (e: any) {
       console.error(e);
-      setError(e.message || 'An unexpected error occurred during PR analysis.');
+      setError(e.message || '在分析 PR 差异代码时发生意外错误。');
       setPrInfo(null);
       setFiles([]);
       setReviewResult(null);
@@ -112,8 +112,8 @@ export function App() {
           </div>
           <div>
             <h1 className="brand-title">AI PR REVIEWER</h1>
-            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Advanced Code Intelligence
+            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textTransform: 'none', letterSpacing: '0.05em' }}>
+              开发团队智能审查助理
             </span>
           </div>
         </div>
@@ -121,7 +121,7 @@ export function App() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           {/* Model Selector */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Model:</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>审阅模型：</span>
             <select
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
@@ -139,7 +139,7 @@ export function App() {
 
           {reviewResult && (
             <button className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '0.85rem' }} onClick={handleReset}>
-              Reset Analysis
+              重新开始
             </button>
           )}
         </div>
@@ -157,7 +157,7 @@ export function App() {
             fontSize: '0.9rem',
             marginBottom: '24px'
           }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '4px' }}>Analysis Failed</h3>
+            <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '4px' }}>代码审查失败</h3>
             {error}
           </div>
         )}
@@ -175,9 +175,9 @@ export function App() {
             </div>
             
             <GlassCard style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <h2 style={{ fontSize: '1.25rem', color: 'var(--color-accent)' }}>AI Code Review Assistance</h2>
+              <h2 style={{ fontSize: '1.25rem', color: 'var(--color-accent)' }}>智能代码审查助理</h2>
               <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.95rem', lineHeight: '1.6' }}>
-                Paste any GitHub Pull Request URL to fetch its full patch diffs and submit it for a multi-stage AI review. Review results are structured securely client-side.
+                输入任意 GitHub Pull Request 链接，拉取代码变更的 diff 补丁，并提交进行多阶段的深度安全、逻辑与架构风险评估。所有审查结果安全地在本地加载和缓存。
               </p>
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '8px' }}>
@@ -190,9 +190,9 @@ export function App() {
                     </svg>
                   </div>
                   <div>
-                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>PR Change Summarization</h4>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>变更概要与架构评估</h4>
                     <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
-                      Generates a concise functional summary and explains changes' architectural footprint and dependencies.
+                      智能总结本次变更的功能要点，并分析其带来的架构冲击、API 变动和模块间依赖关系。
                     </p>
                   </div>
                 </div>
@@ -206,9 +206,9 @@ export function App() {
                     </svg>
                   </div>
                   <div>
-                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Risk & Vulnerability Isolation</h4>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>代码缺陷与安全风险排查</h4>
                     <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
-                      Detects logic bugs, security leaks (API tokens, SQL injection, XSS), race conditions, and heavy loops.
+                      深度扫描逻辑缺陷、硬编码秘钥（API Token/密钥）、安全风险（SQL 注入/XSS）、并发竞争条件和效率瓶颈。
                     </p>
                   </div>
                 </div>
@@ -220,9 +220,9 @@ export function App() {
                     </svg>
                   </div>
                   <div>
-                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Interactive Diff Annotations</h4>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>文件差异行内对照标注</h4>
                     <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
-                      Inspect code diffs inline with AI suggestions overlaid at exact target line offsets, including one-click copyable code suggestions.
+                      还原经典代码差异（Diff）对照视图，在被修改代码行下方就地渲染审查建议，并提供一键复制的重构方案。
                     </p>
                   </div>
                 </div>
@@ -235,9 +235,9 @@ export function App() {
                     </svg>
                   </div>
                   <div>
-                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>PR Feedback Syncing</h4>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>审查卡片一键同步</h4>
                     <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
-                      Publish review reports and line-level recommendations directly to the GitHub PR under your active credentials.
+                      支持使用您自己的 GitHub 访问令牌，将审查大纲和行内评审卡片一键同步并提交到 GitHub Pull Request 官方评论区。
                     </p>
                   </div>
                 </div>
@@ -252,7 +252,7 @@ export function App() {
                 fontSize: '0.8rem',
                 color: 'var(--color-text-muted)'
               }}>
-                <strong>Privacy Info:</strong> Your Aliyun API Key is securely stored on the backend server. PR diff contents are processed and proxied through your local server directly to Aliyun Qwen.
+                <strong>隐私说明：</strong> 您的阿里云 API 密钥安全地保存在您的本地后端服务中。PR 补丁内容均经由您本地启动的后端服务代理转发给 DashScope (通义千问) 模型进行处理。
               </div>
             </GlassCard>
           </div>
@@ -265,19 +265,19 @@ export function App() {
                 className={`tab-btn ${activeTab === 'summary' ? 'active' : ''}`}
                 onClick={() => setActiveTab('summary')}
               >
-                PR Summary
+                PR 概要评估
               </button>
               <button 
                 className={`tab-btn ${activeTab === 'diff' ? 'active' : ''}`}
                 onClick={() => setActiveTab('diff')}
               >
-                Inspect Diff Diffs
+                文件差异比对
               </button>
               <button 
                 className={`tab-btn ${activeTab === 'suggestions' ? 'active' : ''}`}
                 onClick={() => setActiveTab('suggestions')}
               >
-                AI Suggestions ({reviewResult.comments.length})
+                行内审查建议 ({reviewResult.comments.length})
               </button>
             </div>
 
@@ -313,7 +313,7 @@ export function App() {
         fontSize: '0.75rem',
         color: 'var(--color-text-muted)'
       }}>
-        © 2026 AI Pull Request Reviewer Assistant. Running securely in Sandbox Mode.
+        © 2026 智能代码评审助理. 运行于沙箱隔离环境中。
       </footer>
     </div>
   );
